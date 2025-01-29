@@ -2,7 +2,9 @@
 // This file SHOULD be checked into source version control.
 // This file is automatically updated during development when running `dev.ts`.
 
+import * as $_filename_ from './routes/[filename].tsx'
 import * as $_app from './routes/_app.tsx'
+import * as $api_stats from './routes/api/stats.ts'
 import * as $d_hash_ from './routes/d/[hash].tsx'
 import * as $index from './routes/index.tsx'
 import * as $upload_sh from './routes/upload.sh.ts'
@@ -13,7 +15,9 @@ import type { Manifest } from '$fresh/server.ts'
 
 const manifest = {
   routes: {
+    './routes/[filename].tsx': $_filename_,
     './routes/_app.tsx': $_app,
+    './routes/api/stats.ts': $api_stats,
     './routes/d/[hash].tsx': $d_hash_,
     './routes/index.tsx': $index,
     './routes/upload.sh.ts': $upload_sh,
