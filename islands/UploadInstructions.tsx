@@ -3,7 +3,7 @@ import { useState } from 'preact/hooks'
 
 export default function UploadInstructions() {
   const [copied, setCopied] = useState(false)
-  const command = `curl -s https://upload.thingylabs.io/upload.sh | bash -s --`
+  const command = `curl -s https://cryptsend.thingylabs.io/upload.sh | bash -s --`
 
   const handleCopy = () => {
     navigator.clipboard.writeText(command)
