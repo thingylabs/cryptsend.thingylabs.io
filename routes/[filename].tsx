@@ -1,20 +1,32 @@
 // routes/[filename].tsx
 import { Handlers } from '$fresh/server.ts'
-import { join } from '$std/path/join.ts'
 import { checkQuota, updateQuotas } from '../utils/quotas.ts'
-import { addFile, deleteFile, getFile } from '../utils/files.ts'
 import { recordDeletion, recordDownload, recordUpload } from '../utils/stats.ts'
 
-const UPLOAD_DIR = Deno.env.get('UPLOAD_DIR') || './uploads'
 const MAX_FILE_SIZE = parseInt(Deno.env.get('MAX_FILE_SIZE') || '10485760') // 10MB default
 const FILENAME = 'only_you_know'
 
-try {
-  await Deno.mkdir(UPLOAD_DIR, { recursive: true })
-} catch (e) {
-  if (!(e instanceof Deno.errors.AlreadyExists)) {
-    throw e
-  }
+// Initialize KV store
+const kv = await Deno.openKv()
+
+interface FileData {
+  content: Uint8Array
+  size: number
+  created: string
+  deletionKey: string
+}
+
+async function storeFileData(hash: string, data: FileData) {
+  await kv.set(['files', hash], data)
+}
+
+async function getFileData(hash: string): Promise<FileData | null> {
+  const res = await kv.get<FileData>(['files', hash])
+  return res.value
+}
+
+async function deleteFileData(hash: string) {
+  await kv.delete(['files', hash])
 }
 
 export const handler: Handlers = {
@@ -49,7 +61,7 @@ export const handler: Handlers = {
         )
       }
 
-      // Read the request body for storage
+      // Read the request body
       const arrayBuffer = await req.arrayBuffer()
       const fileData = new Uint8Array(arrayBuffer)
 
@@ -59,32 +71,28 @@ export const handler: Handlers = {
         .map((b) => b.toString(16).padStart(2, '0'))
         .join('')
 
-      // Store file using its hash
-      const filePath = join(UPLOAD_DIR, `${hashHex}.enc`)
-
-      // Write file to disk
-      await Deno.writeFile(filePath, fileData)
-      await updateQuotas(fileSize, true)
-      await recordUpload(fileSize)
-
       // Extract key and IV from the filename
       const authKey = filename.slice(-64 - 32 - 4, -4) // 64 for key, 32 for iv, 4 for .enc
 
-      // Store file info in KV using hash as key
-      await addFile(hashHex, {
+      // Store file data and metadata in KV
+      await storeFileData(hashHex, {
+        content: fileData,
         size: fileSize,
         created: new Date().toISOString(),
         deletionKey: authKey,
       })
 
+      await updateQuotas(fileSize, true)
+      await recordUpload(fileSize)
+
       // Auto-deletion after 24h
       setTimeout(async () => {
         try {
-          const fileInfo = await getFile(hashHex)
+          const fileInfo = await getFileData(hashHex)
           if (fileInfo) {
             await recordDeletion(fileInfo.size)
+            await deleteFileData(hashHex)
           }
-          await deleteFile(hashHex)
         } catch {
           // Ignore deletion errors
         }
@@ -110,29 +118,30 @@ export const handler: Handlers = {
       // Get file hash from the start of the filename
       const fileHash = filename.slice(0, 64) // SHA-256 hash is 64 hex chars
 
-      const filePath = join(UPLOAD_DIR, `${fileHash}.enc`)
-
-      const fileInfo = await getFile(fileHash)
-      if (!fileInfo) {
+      const fileData = await getFileData(fileHash)
+      if (!fileData) {
         return new Response('File not found', { status: 404 })
       }
 
-      await recordDownload(fileInfo.size)
+      await recordDownload(fileData.size)
 
-      const file = await Deno.open(filePath)
-      const readableStream = file.readable
+      // Create a ReadableStream from the file content
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(fileData.content)
+          controller.close()
+        },
+      })
 
-      return new Response(readableStream, {
+      return new Response(stream, {
         headers: {
           'content-type': 'application/octet-stream',
           'cache-control': 'no-store',
           'content-disposition': `attachment; filename="${FILENAME}"`,
+          'content-length': fileData.size.toString(),
         },
       })
     } catch (err) {
-      if (err instanceof Deno.errors.NotFound) {
-        return new Response('File not found or expired', { status: 404 })
-      }
       console.error('Download error:', err)
       return new Response('Download failed', { status: 500 })
     }
@@ -153,17 +162,17 @@ export const handler: Handlers = {
       }
       const deletionKey = authHeader.slice(7)
 
-      const fileInfo = await getFile(fileHash)
-      if (!fileInfo) {
+      const fileData = await getFileData(fileHash)
+      if (!fileData) {
         return new Response('File not found', { status: 404 })
       }
 
-      if (fileInfo.deletionKey !== deletionKey) {
+      if (fileData.deletionKey !== deletionKey) {
         return new Response('Invalid authorization', { status: 403 })
       }
 
-      await recordDeletion(fileInfo.size)
-      await deleteFile(fileHash)
+      await recordDeletion(fileData.size)
+      await deleteFileData(fileHash)
 
       return new Response('File deleted', { status: 200 })
     } catch (err) {

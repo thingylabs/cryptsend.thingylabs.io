@@ -26,6 +26,7 @@ Recipients can just click the URL to decrypt and download the file.
 - Files are encrypted before leaving your machine
 - 100MB file size limit
 - URLs include everything needed for decryption
+- File deletion can be triggered manually
 
 ## Security
 

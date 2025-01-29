@@ -68,6 +68,7 @@ export default function Home() {
               <li>Client-side encryption and decryption</li>
               <li>No server-side key storage</li>
               <li>100MB file size limit</li>
+              <li>File deletion can be triggered manually</li>
             </ul>
           </div>
 
