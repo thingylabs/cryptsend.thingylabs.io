@@ -40,7 +40,7 @@ export default function Home() {
             <h3 class='font-bold mb-2'>Upload encrypted files</h3>
             <p class='mb-2'>Copy and run this command to upload a file:</p>
             <div class='bg-gray-50 rounded'>
-              <code class='font-mono block p-4'>
+              <code class='font-mono block p-4 text-sm'>
                 curl -s https://cryptsend.thingylabs.io/upload.sh | bash -s --
                 yourfile
               </code>
