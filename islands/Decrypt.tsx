@@ -33,16 +33,16 @@ export default function Decrypt() {
         // Decrypt
         const keyMatches = key.match(/.{2}/g)
         const ivMatches = iv.match(/.{2}/g)
-        
+
         if (!keyMatches || !ivMatches) {
           throw new Error('Invalid encryption key format')
         }
 
         const keyBuffer = new Uint8Array(
-          keyMatches.map((byte) => parseInt(byte, 16))
+          keyMatches.map((byte) => parseInt(byte, 16)),
         )
         const ivBuffer = new Uint8Array(
-          ivMatches.map((byte) => parseInt(byte, 16))
+          ivMatches.map((byte) => parseInt(byte, 16)),
         )
 
         const cryptoKey = await globalThis.crypto.subtle.importKey(

@@ -19,7 +19,9 @@ export default function Home() {
       <div class='max-w-2xl mx-auto px-4 py-12'>
         <div class='space-y-8'>
           <div class='flex justify-between items-center'>
-            <h1 class='text-2xl font-bold'>cryptsend<span class='text-gray-500'>.thingylabs.io</span></h1>
+            <h1 class='text-2xl font-bold'>
+              cryptsend<span class='text-gray-500'>.thingylabs.io</span>
+            </h1>
             <a
               href='https://github.com/thingylabs/cryptsend'
               class='text-blue-600 hover:underline'
@@ -72,12 +74,14 @@ export default function Home() {
 
           <div class='text-sm text-gray-500 flex justify-between items-center pt-4 border-t'>
             <div>
-              Built by{' '}
-              <a
+              Built by 🔬<a
                 href='https://thingylabs.io'
                 class='text-blue-600 hover:underline'
               >
-               🔬Thingylabs
+                Thingylabs
+              </a>:{' '}
+              <a href='https://open.thingylabs.io' class='hover:underline'>
+                „We <span class='text-red-500'>♥</span> Open Souce“
               </a>
             </div>
             <div>Zero setup • Client-side encryption</div>
