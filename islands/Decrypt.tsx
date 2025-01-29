@@ -1,7 +1,11 @@
 // islands/Decrypt.tsx
 import { useEffect, useState } from 'preact/hooks'
 
-export default function Decrypt() {
+interface DecryptProps {
+  fileExists: boolean | undefined
+}
+
+export default function Decrypt({ fileExists }: DecryptProps) {
   const [status, setStatus] = useState('')
   const [error, setError] = useState('')
   const [downloaded, setDownloaded] = useState(false)
@@ -15,6 +19,10 @@ export default function Decrypt() {
           return
         }
 
+        if (fileExists === false) {
+          throw new Error('File not found or expired')
+        }
+
         // Extract data from hash
         const key = hash.slice(0, 64)
         const iv = hash.slice(64, 96)
@@ -23,8 +31,8 @@ export default function Decrypt() {
 
         setStatus('Decrypting file...')
 
-        // Fetch encrypted file using key as filename
-        const response = await fetch(`/${key}.enc`)
+        // Get file from backend using the current URL path
+        const response = await fetch(`/${key}`)
         if (!response.ok) {
           throw new Error(
             response.status === 404
@@ -93,7 +101,7 @@ export default function Decrypt() {
       const key = hash.slice(0, 64)
       const iv = hash.slice(64, 96)
 
-      const response = await fetch(`/${key}.enc`, {
+      const response = await fetch(`/${key}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${key}${iv}`,
@@ -102,7 +110,7 @@ export default function Decrypt() {
 
       if (!response.ok) throw new Error('Delete failed')
       setStatus('✓ File deleted')
-      setDownloaded(false) // Hide delete button after successful deletion
+      setDownloaded(false)
     } catch (_err) {
       setError('Failed to delete file')
     }
