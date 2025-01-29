@@ -4,9 +4,6 @@ import { checkQuota, updateQuotas } from '../utils/quotas.ts'
 import { recordDeletion, recordDownload, recordUpload } from '../utils/stats.ts'
 
 const MAX_FILE_SIZE = parseInt(Deno.env.get('MAX_FILE_SIZE') || '10485760') // 10MB default
-const FILENAME = 'only_you_know'
-
-// Initialize KV store
 const kv = await Deno.openKv()
 
 interface FileData {
@@ -16,37 +13,29 @@ interface FileData {
   deletionKey: string
 }
 
-async function storeFileData(hash: string, data: FileData) {
-  await kv.set(['files', hash], data)
+async function storeFileData(key: string, data: FileData) {
+  await kv.set(['files', key], data)
 }
 
-async function getFileData(hash: string): Promise<FileData | null> {
-  const res = await kv.get<FileData>(['files', hash])
+async function getFileData(key: string): Promise<FileData | null> {
+  const res = await kv.get<FileData>(['files', key])
   return res.value
 }
 
-async function deleteFileData(hash: string) {
-  await kv.delete(['files', hash])
+async function deleteFileData(key: string) {
+  await kv.delete(['files', key])
 }
 
 export const handler: Handlers = {
   async PUT(req, ctx) {
     try {
-      const filename = ctx.params.filename
-
-      if (!filename.endsWith('.enc')) {
-        return new Response('Only encrypted files (.enc) are accepted', {
-          status: 400,
-        })
-      }
+      const key = ctx.params.filename // This is our storage key
 
       const size = req.headers.get('content-length')
       if (!size || parseInt(size) > MAX_FILE_SIZE) {
         return new Response(
           `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB`,
-          {
-            status: 413,
-          },
+          { status: 413 }
         )
       }
 
@@ -55,9 +44,7 @@ export const handler: Handlers = {
       if (!quotaOk) {
         return new Response(
           'Service quota exceeded (storage or transfer limit reached)',
-          {
-            status: 507,
-          },
+          { status: 507 }
         )
       }
 
@@ -65,21 +52,16 @@ export const handler: Handlers = {
       const arrayBuffer = await req.arrayBuffer()
       const fileData = new Uint8Array(arrayBuffer)
 
-      // Calculate SHA-256 hash of the file content
-      const hash = await crypto.subtle.digest('SHA-256', fileData)
-      const hashHex = Array.from(new Uint8Array(hash))
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('')
-
-      // Extract key and IV from the filename
-      const authKey = filename.slice(-64 - 32 - 4, -4) // 64 for key, 32 for iv, 4 for .enc
+      // Extract IV from the request - it's added to the key for deletion auth
+      const iv = key.slice(64, 96)
+      const deletionKey = key + iv // Full key+iv for deletion auth
 
       // Store file data and metadata in KV
-      await storeFileData(hashHex, {
+      await storeFileData(key, {
         content: fileData,
         size: fileSize,
         created: new Date().toISOString(),
-        deletionKey: authKey,
+        deletionKey
       })
 
       await updateQuotas(fileSize, true)
@@ -88,10 +70,10 @@ export const handler: Handlers = {
       // Auto-deletion after 24h
       setTimeout(async () => {
         try {
-          const fileInfo = await getFileData(hashHex)
+          const fileInfo = await getFileData(key)
           if (fileInfo) {
             await recordDeletion(fileInfo.size)
-            await deleteFileData(hashHex)
+            await deleteFileData(key)
           }
         } catch {
           // Ignore deletion errors
@@ -107,18 +89,9 @@ export const handler: Handlers = {
 
   async GET(_req, ctx) {
     try {
-      const filename = ctx.params.filename
-
-      if (!filename.endsWith('.enc')) {
-        return new Response('Only encrypted files (.enc) are allowed', {
-          status: 400,
-        })
-      }
-
-      // Get file hash from the start of the filename
-      const fileHash = filename.slice(0, 64) // SHA-256 hash is 64 hex chars
-
-      const fileData = await getFileData(fileHash)
+      const key = ctx.params.filename
+      const fileData = await getFileData(key)
+      
       if (!fileData) {
         return new Response('File not found', { status: 404 })
       }
@@ -130,16 +103,15 @@ export const handler: Handlers = {
         start(controller) {
           controller.enqueue(fileData.content)
           controller.close()
-        },
+        }
       })
 
       return new Response(stream, {
         headers: {
           'content-type': 'application/octet-stream',
           'cache-control': 'no-store',
-          'content-disposition': `attachment; filename="${FILENAME}"`,
-          'content-length': fileData.size.toString(),
-        },
+          'content-length': fileData.size.toString()
+        }
       })
     } catch (err) {
       console.error('Download error:', err)
@@ -149,12 +121,7 @@ export const handler: Handlers = {
 
   async DELETE(req, ctx) {
     try {
-      const filename = ctx.params.filename
-      if (!filename.endsWith('.enc')) {
-        return new Response('Invalid file type', { status: 400 })
-      }
-
-      const fileHash = filename.slice(0, 64)
+      const key = ctx.params.filename
 
       const authHeader = req.headers.get('Authorization')
       if (!authHeader?.startsWith('Bearer ')) {
@@ -162,7 +129,7 @@ export const handler: Handlers = {
       }
       const deletionKey = authHeader.slice(7)
 
-      const fileData = await getFileData(fileHash)
+      const fileData = await getFileData(key)
       if (!fileData) {
         return new Response('File not found', { status: 404 })
       }
@@ -172,12 +139,12 @@ export const handler: Handlers = {
       }
 
       await recordDeletion(fileData.size)
-      await deleteFileData(fileHash)
+      await deleteFileData(key)
 
       return new Response('File deleted', { status: 200 })
     } catch (err) {
       console.error('Delete error:', err)
       return new Response('Delete failed', { status: 500 })
     }
-  },
+  }
 }
