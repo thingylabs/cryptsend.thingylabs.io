@@ -36,5 +36,3 @@ Recipients can just click the URL to decrypt and download the file.
 ## Development
 
 This tool was developed by [Thingylabs](https://thingylabs.io) with assistance from [Claude AI](https://anthropic.com/claude).
-
-Released under MIT License.
