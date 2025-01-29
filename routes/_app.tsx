@@ -3,13 +3,13 @@ import { AppProps } from '$fresh/server.ts'
 
 export default function App({ Component }: AppProps) {
   return (
-    <html>
+    <html className='dark:bg-gray-900 dark:text-white'>
       <head>
-        <meta charset='utf-8' />
+        <meta charSet='utf-8' />
         <meta name='viewport' content='width=device-width, initial-scale=1.0' />
         <link rel='stylesheet' href='/styles.css' />
       </head>
-      <body>
+      <body className='bg-white text-black dark:bg-gray-900 dark:text-white transition-colors duration-300'>
         <Component />
       </body>
     </html>

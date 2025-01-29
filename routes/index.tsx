@@ -7,8 +7,7 @@ export default function Home() {
     <>
       <Head>
         <title>
-          Cryptsend - Secure File Sharing from Your Terminal | Zero Setup CLI
-          Tool
+          Cryptsend - Secure File Sharing Terminal | Zero Setup CLI Tool
         </title>
         <meta
           name='description'
@@ -16,45 +15,45 @@ export default function Home() {
         />
       </Head>
 
-      <div class='max-w-2xl mx-auto px-4 py-12'>
-        <div class='space-y-8'>
-          <div class='flex justify-between items-center'>
-            <h1 class='text-2xl font-bold'>
-              cryptsend<span class='text-gray-500'>.thingylabs.io</span>
+      <div className='max-w-2xl mx-auto px-4 py-12'>
+        <div className='space-y-8'>
+          <div className='flex justify-between items-center'>
+            <h1 className='text-2xl font-bold'>
+              cryptsend<span className='text-gray-500'>.thingylabs.io</span>
             </h1>
             <a
               href='https://github.com/thingylabs/cryptsend.thingylabs.io'
-              class='text-blue-600 hover:underline'
+              className='text-blue-600 hover:underline'
             >
               GitHub
             </a>
           </div>
 
           <div>
-            <h2 class='text-xl mb-2'>Secure File Sharing</h2>
-            <p class='text-gray-600'>
+            <h2 className='text-xl mb-2'>Secure File Sharing</h2>
+            <p className='text-gray-600 dark:text-gray-300'>
               Share files securely from your terminal with zero setup. Files are
               encrypted before upload using AES-256-CBC.
             </p>
           </div>
 
           <div>
-            <h3 class='font-bold mb-2'>Upload encrypted files</h3>
-            <p class='mb-2'>Copy and run this command to upload a file:</p>
-            <div class='bg-gray-50 rounded'>
-              <code class='font-mono block p-4 text-sm'>
+            <h3 className='font-bold mb-2'>Upload encrypted files</h3>
+            <p className='mb-2'>Copy and run this command to upload a file:</p>
+            <div className='bg-gray-50 dark:bg-gray-800 rounded'>
+              <code className='font-mono block p-4 text-sm'>
                 curl -s https://cryptsend.thingylabs.io/upload.sh | bash -s --
                 yourfile
               </code>
-              <div class='border-t bg-gray-100 p-2 flex justify-end'>
+              <div className='border-t bg-gray-100 dark:bg-gray-700 p-2 flex justify-end'>
                 <CopyButton />
               </div>
             </div>
           </div>
 
           <div>
-            <h3 class='font-bold mb-2'>How it works</h3>
-            <ol class='list-decimal list-inside space-y-1 text-gray-600'>
+            <h3 className='font-bold mb-2'>How it works</h3>
+            <ol className='list-decimal list-inside space-y-1 text-gray-600 dark:text-gray-300'>
               <li>Your file is encrypted locally using OpenSSL</li>
               <li>The encrypted file is uploaded securely</li>
               <li>You get a URL containing the decryption key</li>
@@ -63,8 +62,8 @@ export default function Home() {
           </div>
 
           <div>
-            <h3 class='font-bold mb-2'>Security features</h3>
-            <ul class='list-disc list-inside space-y-1 text-gray-600'>
+            <h3 className='font-bold mb-2'>Security features</h3>
+            <ul className='list-disc list-inside space-y-1 text-gray-600 dark:text-gray-300'>
               <li>AES-256-CBC encryption</li>
               <li>Client-side encryption and decryption</li>
               <li>No server-side key storage</li>
@@ -72,19 +71,19 @@ export default function Home() {
             </ul>
           </div>
 
-          <div class='text-sm text-gray-500 flex justify-between items-center pt-4 border-t'>
+          <div className='text-sm text-gray-500 dark:text-gray-400 flex justify-between items-center pt-4 border-t'>
             <div>
               Built by 🔬<a
                 href='https://thingylabs.io'
-                class='text-blue-600 hover:underline'
+                className='text-blue-600 dark:text-blue-400 hover:underline'
               >
                 Thingylabs
               </a>:{' '}
-              <a href='https://open.thingylabs.io' class='hover:underline'>
-                „We <span class='text-red-500'>♥</span> Open Souce“
+              <a href='https://open.thingylabs.io' className='hover:underline'>
+                „We <span className='text-red-500'>♥</span> Open Source“
               </a>
             </div>
-            <div>Zero setup • Client-side encryption</div>
+            <div>Zero setup, encrypted file sharing for everyone!</div>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@
 import { type Config } from 'tailwindcss'
 
 export default {
+  darkMode: 'media', // Uses system preference
   content: [
     '{routes,islands,components}/**/*.{ts,tsx}',
   ],
