@@ -6,7 +6,7 @@ export default function CopyButton() {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(
-      'curl -s https://upload.thingylabs.io/upload.sh | bash -s -- yourfile',
+      'curl -s https://cryptsend.thingylabs.io/upload.sh | bash -s -- yourfile',
     )
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
