@@ -44,7 +44,7 @@ export default function Home() {
             <div class='bg-gray-50 rounded'>
               <code class='font-mono block p-4 text-sm'>
                 curl -s https://cryptsend.thingylabs.io/upload.sh | bash -s --
-                yourfile.pdf
+                yourfile
               </code>
               <div class='border-t bg-gray-100 p-2 flex justify-end'>
                 <CopyButton />
