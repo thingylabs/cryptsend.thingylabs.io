@@ -41,7 +41,7 @@ export default function Home() {
             <p class='mb-2'>Copy and run this command to upload a file:</p>
             <div class='bg-gray-50 rounded'>
               <code class='font-mono block p-4'>
-                curl -s https://cryptsend.thingylabs.io/upload.sh | bash -s --
+                curl -s https://upload.thingylabs.io/upload.sh | bash -s --
                 yourfile
               </code>
               <div class='border-t bg-gray-100 p-2 flex justify-end'>

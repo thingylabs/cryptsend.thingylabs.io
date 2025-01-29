@@ -25,7 +25,7 @@ export default function Decrypt() {
 
         // Fetch encrypted file
         const response = await fetch(
-          `https://cryptsend.thingylabs.io/${encodedFilename}.enc`,
+          `https://upload.thingylabs.io/${encodedFilename}.enc`,
         )
         if (!response.ok) throw new Error('File not found')
         const encryptedData = await response.arrayBuffer()
