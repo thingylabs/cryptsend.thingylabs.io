@@ -23,7 +23,7 @@ export default function Home() {
               cryptsend<span class='text-gray-500'>.thingylabs.io</span>
             </h1>
             <a
-              href='https://github.com/thingylabs/cryptsend'
+              href='https://github.com/thingylabs/cryptsend.thingylabs.io'
               class='text-blue-600 hover:underline'
             >
               GitHub
