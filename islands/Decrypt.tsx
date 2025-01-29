@@ -23,11 +23,15 @@ export default function Decrypt() {
 
         setStatus('Decrypting file...')
 
-        // Fetch encrypted file
-        const response = await fetch(
-          `/${encodedFilename}.enc`,
-        )
-        if (!response.ok) throw new Error('File not found')
+        // Fetch encrypted file using key as filename
+        const response = await fetch(`/${key}.enc`)
+        if (!response.ok) {
+          throw new Error(
+            response.status === 404
+              ? 'File not found or expired'
+              : 'Failed to fetch file',
+          )
+        }
         const encryptedData = await response.arrayBuffer()
 
         const keyMatches = key.match(/.{2}/g)
@@ -88,12 +92,11 @@ export default function Decrypt() {
       const hash = globalThis.location.hash.slice(1)
       const key = hash.slice(0, 64)
       const iv = hash.slice(64, 96)
-      const encodedFilename = hash.slice(96)
 
-      const response = await fetch(`/${encodedFilename}.enc`, {
+      const response = await fetch(`/${key}.enc`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${key}${iv}`, // Use key+iv as deletion authorization
+          'Authorization': `Bearer ${key}${iv}`,
         },
       })
 
