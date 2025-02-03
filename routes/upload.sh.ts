@@ -34,11 +34,11 @@ file() {
 
 upload() {
   local file="\${1}"
-  local filename="$(basename "\${file}")"
-  local key="$(openssl rand -hex 32)"
-  local iv="$(openssl rand -hex 16)"
-  local encoded_filename
+  local filename encoded_filename key iv
   
+  filename="$(basename "\${file}")"
+  key="$(openssl rand -hex 32)"
+  iv="$(openssl rand -hex 16)"
   encoded_filename="$(
     echo -n "\${filename}" | xxd -plain | tr -d '\n' | sed 's/\\(.\\{2\\}\\)/%\\1/g')
   )"
