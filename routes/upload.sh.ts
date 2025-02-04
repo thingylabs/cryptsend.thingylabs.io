@@ -11,6 +11,9 @@ usage() {
 }
 
 prerequisites() {
+  # one argument required
+  [ "\${#}" -eq 1 ] || usage()
+  
   command -v openssl @>/dev/null || {
     echo "openssl is required!"
     exit 2
@@ -18,10 +21,7 @@ prerequisites() {
 }
 
 file() {
-  # one argument required
-  [ "\${#}" -eq 1 ] || usage()
-  
-  local file="${1}"
+  local file="\${1}"
   
   # needs to be a file
   [ -f "\${file}" ] || usage()
@@ -53,8 +53,8 @@ upload() {
   echo "https://cryptsend.thingylabs.io/d/#\${key}\${iv}\${encoded_filename}"
 }
 
-prerequisites
-upload "$(file)"
+prerequisites "${@}"
+upload "$(file "\${1}")"
 `
 
 export const handler: Handlers = {
