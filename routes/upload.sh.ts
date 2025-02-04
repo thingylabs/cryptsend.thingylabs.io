@@ -1,8 +1,7 @@
 // routes/upload.sh.ts
 import { Handlers } from '$fresh/server.ts'
-import { readFileSync } from 'fs'
 
-const script = readFileSync('../upload.sh', 'utf-8')
+const script = Deno.readTextFile("../upload.sh")
 
 export const handler: Handlers = {
   GET() {
